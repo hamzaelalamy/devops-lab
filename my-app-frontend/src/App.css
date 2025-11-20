@@ -1,0 +1,189 @@
+/* Body centers content vertically and horizontally */
+body {
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  background: #232323;
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  /* Flex centering for entire viewport */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#root, .app-outer {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main app card */
+.App {
+  max-width: 700px;
+  min-width: 340px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  background: #242834;
+  border-radius: 14px;
+  box-shadow: 0 5px 32px rgba(0,0,0,0.32);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+header h1 {
+  font-size: 2.8rem;
+  letter-spacing: 2px;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+h2, h3 {
+  margin-top: 1.7rem;
+  margin-bottom: 0.8rem;
+  letter-spacing: 1px;
+  text-align: left;
+  width: 100%;
+}
+
+form {
+  width: 100%;
+  max-width: 540px;
+  margin-bottom: 2rem;
+  padding: 1.5rem 1rem;
+  background: #191b20;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+form input[type="text"],
+form input[type="number"] {
+  background: #232323;
+  border: none;
+  outline: none;
+  color: #fff;
+  width: 94%;
+  margin: 0;
+  padding: 0.7rem 1rem;
+  font-size: 1.06rem;
+  border-bottom: 2px solid #444;
+  border-radius: 0;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus {
+  border-bottom: 2px solid #6d3af8;
+  background: #202026;
+}
+
+form input[type="file"] {
+  background: #191b20;
+  color: #bbb;
+  border: none;
+  padding: 0.5rem 1rem 0.2rem;
+  width: 94%;
+}
+
+button {
+  background: linear-gradient(90deg,#6d3af8,#48c6ef);
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.7rem 2.5rem;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.1s;
+  margin-top: .6rem;
+}
+button:active { transform: scale(0.97); }
+button:disabled { background: #515151; cursor: not-allowed; opacity: .7; }
+
+.message {
+  margin: 1.2rem 0;
+  font-size: 1.1rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  background: #3a3a3a;
+  color: #ffb04c;
+  width: 100%;
+  text-align: center;
+}
+
+ul.products-list {
+  padding-left: 0;
+  list-style: none;
+  width: 100%;
+}
+
+.products-list li {
+  background: #252a32;
+  border-radius: 7px;
+  margin-bottom: 1.2rem;
+  padding: 1.2rem;
+  box-shadow: 0 2px 8px #1113;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+.prod-title {
+  font-weight: 500;
+  font-size: 1.18rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.prod-price {
+  font-weight: 600;
+  color: #6d3af8;
+  margin-left: 1.2rem;
+}
+.prod-desc {
+  font-style: italic;
+  color: #bebebe;
+}
+
+.products-list img {
+  max-width: 120px;
+  border-radius: 7px;
+  border: 2px solid #6d3af8;
+  margin-top: .5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+  .App {
+    padding: 1.5rem 0.5rem;
+    min-width: unset;
+  }
+  form {
+    max-width: 98vw;
+    padding: 1rem 0.2rem;
+  }
+}
+
+/* Add minimal scrollbar color for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #242834;
+}
+::-webkit-scrollbar-thumb {
+  background: #191b20;
+  border-radius: 6px;
+}
