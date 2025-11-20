@@ -12,17 +12,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Configure local file storage
-const upload = multer({ 
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, path.join(__dirname, 'uploads'));
-    },
-    filename: (req, file, cb) => {
-      // Save with timestamp to avoid collisions
-      cb(null, `${Date.now()}-${file.originalname}`);
-    }
-  })
-});
+const upload = multer({ storage: multer.memoryStorage() });
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -54,26 +44,48 @@ async function createTables() {
   await pool.query(createProductsTable);
 }
 
-app.post('/api/products', upload.single('image'), async (req, res) => {
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+app.post("/api/products", upload.single("image"), async (req, res) => {
   try {
     const { name, description, price } = req.body;
     const file = req.file;
+
     if (!name || !price || !file) {
-      console.error('Missing fields:', { name, price, file });
-      return res.status(400).json({ error: 'Missing fields' });
+      return res.status(400).json({ error: "Missing fields" });
     }
-    // Local image path for retrieval
-    const localImageUrl = `/uploads/${file.filename}`;
+
+    // Upload to S3
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const s3Command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+    await s3Client.send(s3Command);
+
+    const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+
     await pool.execute(
-      'INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)',
-      [name, description, price, localImageUrl]
+      "INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)",
+      [name, description, price, imageUrl]
     );
-    res.json({ success: true, imageUrl: localImageUrl });
+    res.json({ success: true, imageUrl });
   } catch (err) {
-    console.error('Error:', err);
-    res.status(500).json({ error: 'Error adding product', details: err.message });
+    console.error("Error:", err);
+    res.status(500).json({ error: "Error adding product", details: err.message });
   }
 });
+
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
