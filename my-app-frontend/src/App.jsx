@@ -18,13 +18,15 @@ function App() {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+	const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products');
+      const res = await fetch(`${API_BASE_URL}/api/products`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
-      setMessage('Error fetching products');
+      console.error('Error fetching products:', err);
+      setMessage('Error fetching products: ' + err.message);
     }
   };
 

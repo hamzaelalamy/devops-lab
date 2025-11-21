@@ -108,8 +108,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
 });
 
-// Serve React app for any other route (must be last!)
-app.get('*', (req, res) => {
+// Catch-all: serve index.html for non-API routes (SPA routing)
+app.use((req, res, next) => {
   res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
