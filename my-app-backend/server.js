@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Configure local file storage
+// Configure memory storage for multer (for S3 upload)
 const upload = multer({ storage: multer.memoryStorage() });
 
 const pool = mysql.createPool({
@@ -23,7 +23,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
-// Create uploads folder if it doesn’t exist
+// Create uploads folder if it doesn't exist
 const fs = require('fs');
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -54,6 +54,14 @@ const s3Client = new S3Client({
   },
 });
 
+// Serve static frontend files from my-app-frontend/dist
+const frontendDistPath = path.join(__dirname, '..', 'my-app-frontend', 'dist');
+app.use(express.static(frontendDistPath));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// API Routes
 app.post("/api/products", upload.single("image"), async (req, res) => {
   try {
     const { name, description, price } = req.body;
@@ -86,28 +94,23 @@ app.post("/api/products", upload.single("image"), async (req, res) => {
   }
 });
 
-
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.get('/api/products', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM products ORDER BY id DESC');
-    // Map local URLs to absolute (for frontend usage)
-    const backendUrl = `http://localhost:${process.env.PORT || 3000}`;
-    rows.forEach(prod => {
-      if (prod.image_url && !prod.image_url.startsWith('http'))
-        prod.image_url = backendUrl + prod.image_url;
-    });
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
-// Health endpoint (optional)
+// Health endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Serve React app for any other route (must be last!)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
