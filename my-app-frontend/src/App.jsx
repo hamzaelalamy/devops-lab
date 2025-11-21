@@ -18,9 +18,9 @@ function App() {
     fetchProducts();
   }, []);
 
-	const fetchProducts = async () => {
+  const fetchProducts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products`);
+      const res = await fetch('/api/products');
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setProducts(data);
@@ -52,12 +52,19 @@ function App() {
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to add product');
+      }
+      const data = await res.json();
       setMessage('✅ Product added!');
       setProduct({ name: '', description: '', price: '', image: null });
+      // Reset file input
+      document.querySelector('input[type="file"]').value = '';
       fetchProducts();
     } catch (err) {
-      setMessage('❌ Error submitting product');
+      console.error('Error submitting:', err);
+      setMessage('❌ Error submitting product: ' + err.message);
     }
     setUploading(false);
   };
@@ -87,6 +94,7 @@ function App() {
         <input
           type="number"
           min="0"
+          step="0.01"
           name="price"
           placeholder="Price"
           value={product.price}
